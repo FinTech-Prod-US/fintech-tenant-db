@@ -1,0 +1,8 @@
+tenant: mcb
+environment: prod
+description: MCB tenant database configuration
+db_names:
+  primary: mcb_check_payment_platform
+  business_rules: mcb_business_rules
+  dup_detect: mcb_dup_detect
+  accs: mcb_check_payment_platform

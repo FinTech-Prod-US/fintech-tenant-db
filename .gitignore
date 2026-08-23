@@ -1,0 +1,15 @@
+# Ignore rendered output directories
+rendered/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environments
+.venv/
+venv/
+
+# Ignore IDE files
+.vscode/
+.idea/
