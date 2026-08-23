@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS EIE_BATCH (
 -- SEED: Return Code Mappings for BANK001
 -- ============================================================================
 
-INSERT INTO EIE_RETURN_CODE_MAPPING (BANK_ID, SOURCE_CODE, SOURCE_DESCRIPTION, X9_RETURN_CODE, X9_DESCRIPTION) VALUES
+INSERT IGNORE INTO EIE_RETURN_CODE_MAPPING (BANK_ID, SOURCE_CODE, SOURCE_DESCRIPTION, X9_RETURN_CODE, X9_DESCRIPTION) VALUES
 ('BANK001', 'NSF', 'Non-Sufficient Funds', 'R01', 'Insufficient Funds'),
 ('BANK001', 'INSF', 'Insufficient Funds', 'R01', 'Insufficient Funds'),
 ('BANK001', 'ACCT_CLOSED', 'Account Closed', 'R02', 'Account Closed'),
@@ -131,7 +131,7 @@ ON DUPLICATE KEY UPDATE X9_RETURN_CODE = VALUES(X9_RETURN_CODE), X9_DESCRIPTION 
 -- SEED: Source Configurations for BANK001
 -- ============================================================================
 
-INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_JSON) VALUES
+INSERT IGNORE INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_JSON) VALUES
 
 -- NSF Returns (Flat File format)
 ('BANK001', 'POSTING_NSF', 'Posting Engine - NSF Returns', 1, '{

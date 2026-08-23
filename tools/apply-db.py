@@ -14,13 +14,16 @@ tenant/ files. Use --dry-run to print the execution plan without running it.
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
 try:
     import pymysql
+    from pymysql.constants import CLIENT as MYSQL_CLIENT_FLAGS
 except ImportError:
     pymysql = None
+    MYSQL_CLIENT_FLAGS = None
 
 
 def discover_sql_files(rendered_dir: Path) -> tuple[list[Path], list[Path]]:
@@ -38,6 +41,44 @@ def discover_sql_files(rendered_dir: Path) -> tuple[list[Path], list[Path]]:
     return schema_files, tenant_files
 
 
+def extract_use_database(content: str) -> str | None:
+    match = re.search(
+        r"^USE\s+`?([^`\s;]+)`?\s*;",
+        content,
+        re.IGNORECASE | re.MULTILINE,
+    )
+    if match:
+        return match.group(1).strip()
+    return None
+
+
+def ensure_databases_exist(connection, rendered_dir: Path) -> None:
+    schema_dir = rendered_dir / "schema"
+    tenant_dir = rendered_dir / "tenant"
+    databases: set[str] = set()
+
+    for source_dir in (schema_dir, tenant_dir):
+        if not source_dir.exists():
+            continue
+        for sql_file in source_dir.rglob("*.sql"):
+            content = sql_file.read_text(encoding="utf-8")
+            db_name = extract_use_database(content)
+            if db_name:
+                databases.add(db_name)
+
+    if not databases:
+        return
+
+    print(f"Ensuring databases exist: {', '.join(sorted(databases))}")
+    with connection.cursor() as cursor:
+        for db_name in sorted(databases):
+            cursor.execute(
+                f"CREATE DATABASE IF NOT EXISTS `{db_name}` "
+                "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+            )
+    connection.commit()
+
+
 def execute_sql_file(
     connection,
     file_path: Path,
@@ -51,19 +92,19 @@ def execute_sql_file(
     if not content.strip():
         return
 
-    # Split on semicolons, but avoid splitting inside string literals is non-trivial.
-    # For local init scripts, the standard delimiter ";\n" usually works.
-    statements = [s.strip() for s in content.split(";") if s.strip()]
+    # The source schema/seed files may have foreign-key references to tables that
+    # are created later in the same batch, and seed files may contain JSON strings
+    # with semicolons. Disable FK checks and execute the whole file as one batch
+    # so MySQL parses it correctly, just like the legacy setup script did.
+    wrapped_content = (
+        "SET FOREIGN_KEY_CHECKS=0;\n" + content + "\nSET FOREIGN_KEY_CHECKS=1;\n"
+    )
 
     with connection.cursor() as cursor:
-        for stmt in statements:
-            if stmt.startswith("--") or stmt.startswith("/*"):
-                continue
-            try:
-                cursor.execute(stmt)
-            except Exception as exc:
-                print(f"    ERROR executing statement from {file_path}: {exc}")
-                raise
+        cursor.execute(wrapped_content)
+        # Drain any pending result sets so the connection stays clean.
+        while cursor.nextset():
+            pass
     connection.commit()
 
 
@@ -99,9 +140,11 @@ def apply(
         password=mysql_password,
         charset="utf8mb4",
         autocommit=False,
+        client_flag=MYSQL_CLIENT_FLAGS.MULTI_STATEMENTS,
     )
 
     try:
+        ensure_databases_exist(connection, rendered_dir)
         for file_path in all_files:
             execute_sql_file(connection, file_path, dry_run)
         print("All SQL files applied successfully")

@@ -469,10 +469,10 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: v_collection_code_mappings (18 rows)
-DROP TABLE IF EXISTS `v_collection_code_mappings`;
+DROP VIEW IF EXISTS `v_collection_code_mappings`;
 CREATE ALGORITHM=UNDEFINED DEFINER=`cpp_dev`@`%` SQL SECURITY DEFINER VIEW `v_collection_code_mappings` AS select `cor`.`Coll_Type` AS `Coll_Type`,`cor`.`OriginRT` AS `OriginRT`,`cor`.`Collection_Code` AS `Primary_Collection_Code`,`cor`.`Description` AS `Primary_Description`,`cud`.`Coll_Code` AS `Secondary_Collection_Code`,`cud`.`Description` AS `Secondary_Description`,`cud`.`UserField` AS `UserField` from (`COLLECTION_CODE_ORIGRT_REF` `cor` left join `COLLECTION_CODE_UD_REF` `cud` on(((`cor`.`Coll_Type` = `cud`.`Coll_Type`) and (`cor`.`OriginRT` = `cud`.`OriginRT`))));
 
 -- Table: v_workflow_rules (4 rows)
-DROP TABLE IF EXISTS `v_workflow_rules`;
+DROP VIEW IF EXISTS `v_workflow_rules`;
 CREATE ALGORITHM=UNDEFINED DEFINER=`cpp_dev`@`%` SQL SECURITY DEFINER VIEW `v_workflow_rules` AS select `wm`.`Id` AS `Id`,`wm`.`Collection_Code` AS `Collection_Code`,`wm`.`Name` AS `Name`,`wm`.`FDE_JSON_Rule` AS `FDE_JSON_Rule`,`wm`.`IDE_JSON_Rule` AS `IDE_JSON_Rule`,`wm`.`created_at` AS `created_at`,`wm`.`updated_at` AS `updated_at` from `WORKFLOW_MASTER` `wm`;
 

@@ -7,7 +7,7 @@
 USE ${DB_NAME_PRIMARY};
 
 -- Seed: ACCOUNT_PRODUCT_LIMIT (14 rows)
-INSERT INTO ACCOUNT_PRODUCT_LIMIT (PRODUCT_CODE, PRODUCT_NAME, PRODUCT_FAMILY, MAX_CHECK_AMOUNT, CURRENCY_CODE, MAX_DAILY_TOTAL, MAX_MONTHLY_TOTAL, REQUIRES_POSPAY, POSPAY_THRESHOLD, EFFECTIVE_DATE, EXPIRY_DATE, ACTIVE_FLAG) VALUES
+INSERT IGNORE INTO ACCOUNT_PRODUCT_LIMIT (PRODUCT_CODE, PRODUCT_NAME, PRODUCT_FAMILY, MAX_CHECK_AMOUNT, CURRENCY_CODE, MAX_DAILY_TOTAL, MAX_MONTHLY_TOTAL, REQUIRES_POSPAY, POSPAY_THRESHOLD, EFFECTIVE_DATE, EXPIRY_DATE, ACTIVE_FLAG) VALUES
 ('BASIC_CHECKING', 'Basic / Low-Balance Checking', 'CONSUMER', 25000.00, 'USD', NULL, NULL, 0, NULL, '2026-01-01', NULL, 1),
 ('COMMERCIAL_DDA', 'Commercial DDA', 'COMMERCIAL', 5000000.00, 'USD', NULL, NULL, 1, 500000.00, '2026-01-01', NULL, 1),
 ('CONSUMER_CHECKING', 'Consumer Checking', 'CONSUMER', 100000.00, 'USD', NULL, NULL, 0, NULL, '2026-01-01', NULL, 1),
@@ -24,7 +24,7 @@ INSERT INTO ACCOUNT_PRODUCT_LIMIT (PRODUCT_CODE, PRODUCT_NAME, PRODUCT_FAMILY, M
 ('ZBA', 'Zero Balance Account (ZBA)', 'COMMERCIAL', 10000000.00, 'USD', NULL, NULL, 1, 1000000.00, '2026-01-01', NULL, 1);
 
 -- Seed: PRIORITY_BAND_MASTER (5 rows)
-INSERT INTO PRIORITY_BAND_MASTER (priority_band, severity_order, severity_name, description, auto_return_flag, ops_repairable_flag, active_flag) VALUES
+INSERT IGNORE INTO PRIORITY_BAND_MASTER (priority_band, severity_order, severity_name, description, auto_return_flag, ops_repairable_flag, active_flag) VALUES
 ('P0', 0, 'FRAUD_CRITICAL', 'Fraud or counterfeit risk. Immediate escalation to fraud queue. Highest severity.', 1, 0, 1),
 ('P1', 1, 'TECHNICAL_HARD_REJECT', 'Image or format invalid. Cannot process item technically. Auto return.', 1, 0, 1),
 ('P2', 2, 'BUSINESS_POSTING_RETURN', 'Valid image but posting/business rule failure. Return or posting review required.', 1, 0, 1),
@@ -32,14 +32,14 @@ INSERT INTO PRIORITY_BAND_MASTER (priority_band, severity_order, severity_name, 
 ('P4', 4, 'COSMETIC_MINOR', 'Minor quality issues. Informational or low impact.', 0, 1, 1);
 
 -- Seed: REVIEW_OUTCOME_MASTER (4 rows)
-INSERT INTO REVIEW_OUTCOME_MASTER (review_outcome_code, review_outcome_name, mapped_x9_code, active_flag) VALUES
+INSERT IGNORE INTO REVIEW_OUTCOME_MASTER (review_outcome_code, review_outcome_name, mapped_x9_code, active_flag) VALUES
 ('AMOUNT_UNREADABLE', 'Amount cannot be determined', 'W', 1),
 ('IMAGE_UNUSABLE', 'Image unusable / missing required info', 'U', 1),
 ('MICR_UNREADABLE', 'MICR / RT / Account cannot be determined', 'B', 1),
 ('READABLE_OK', 'Readable / No blocking issue', NULL, 1);
 
 -- Seed: EXCEPTION_MASTER (27 rows)
-INSERT INTO EXCEPTION_MASTER (exception_code, exception_name, exception_category, priority_band, rank_in_band, ops_repairable_flag, default_queue, default_x9_code, active_flag) VALUES
+INSERT IGNORE INTO EXCEPTION_MASTER (exception_code, exception_name, exception_category, priority_band, rank_in_band, ops_repairable_flag, default_queue, default_x9_code, active_flag) VALUES
 ('ACCOUNT_CLOSED', 'Account Closed', 'POSTING', 'P2', 3, 0, 'RETURN', 'R', 1),
 ('ACCOUNT_FROZEN', 'Account Frozen', 'POSTING', 'P2', 4, 0, 'RETURN', 'S', 1),
 ('ACCOUNT_NOT_FOUND', 'Account Not Found', 'POSTING', 'P2', 5, 0, 'RETURN', 'B', 1),
@@ -69,7 +69,7 @@ INSERT INTO EXCEPTION_MASTER (exception_code, exception_name, exception_category
 ('UNDERSIZED_IMAGE', 'Undersized Image', 'IMAGE', 'P4', 7, 1, 'FROM_CDE_TO_IMAGE_REVIEW', 'U', 1);
 
 -- Seed: EXCEPTION_WORKFLOW_RULE (23 rows)
-INSERT INTO EXCEPTION_WORKFLOW_RULE (exception_code, queue_name, ops_can_key_amount, ops_can_key_date, ops_can_key_payee, ops_can_key_micr_rt, ops_can_key_micr_acct, ops_can_key_micr_serial, if_success_next_state, if_fail_action, if_fail_x9_code, active_flag) VALUES
+INSERT IGNORE INTO EXCEPTION_WORKFLOW_RULE (exception_code, queue_name, ops_can_key_amount, ops_can_key_date, ops_can_key_payee, ops_can_key_micr_rt, ops_can_key_micr_acct, ops_can_key_micr_serial, if_success_next_state, if_fail_action, if_fail_x9_code, active_flag) VALUES
 ('ACCOUNT_CLOSED', 'POSTING_REVIEW', 0, 0, 0, 0, 0, 0, 'CONTINUE', 'RETURN', 'R', 1),
 ('ACCOUNT_FROZEN', 'POSTING_REVIEW', 0, 0, 0, 0, 0, 0, 'CONTINUE', 'RETURN', 'S', 1),
 ('ACCOUNT_NOT_FOUND', 'POSTING_REVIEW', 0, 0, 0, 0, 0, 0, 'CONTINUE', 'RETURN', 'B', 1),
@@ -95,7 +95,7 @@ INSERT INTO EXCEPTION_WORKFLOW_RULE (exception_code, queue_name, ops_can_key_amo
 ('UNDERSIZED_IMAGE', 'IMAGE_REVIEW', 0, 0, 1, 0, 0, 0, 'REEVALUATE', 'RETURN', NULL, 1);
 
 -- Seed: EXCEPTION_X9_CONDITION_MAP (20 rows)
-INSERT INTO EXCEPTION_X9_CONDITION_MAP (exception_code, condition_type, condition_value, x9_return_code, active_flag) VALUES
+INSERT IGNORE INTO EXCEPTION_X9_CONDITION_MAP (exception_code, condition_type, condition_value, x9_return_code, active_flag) VALUES
 ('EXCESSIVE_BLUR', 'REVIEW_OUTCOME', 'AMOUNT_UNREADABLE', 'W', 1),
 ('EXCESSIVE_BLUR', 'REVIEW_OUTCOME', 'IMAGE_UNUSABLE', 'U', 1),
 ('EXCESSIVE_BLUR', 'REVIEW_OUTCOME', 'MICR_UNREADABLE', 'B', 1),
@@ -118,12 +118,12 @@ INSERT INTO EXCEPTION_X9_CONDITION_MAP (exception_code, condition_type, conditio
 ('UNDERSIZED_IMAGE', 'REVIEW_OUTCOME', 'IMAGE_UNUSABLE', 'U', 1);
 
 -- Seed: CL_FILE_PROFILE (2 rows)
-INSERT INTO CL_FILE_PROFILE (FILE_PROFILE_ID, PROFILE_NAME, FORMAT_TYPE, DEST_RT, ORIG_RT, DEST_NAME, ORIG_NAME, STANDARD_LEVEL, TEST_INDICATOR, COUNTRY_CODE, MAX_BUNDLE_ITEMS, ACTIVE) VALUES
+INSERT IGNORE INTO CL_FILE_PROFILE (FILE_PROFILE_ID, PROFILE_NAME, FORMAT_TYPE, DEST_RT, ORIG_RT, DEST_NAME, ORIG_NAME, STANDARD_LEVEL, TEST_INDICATOR, COUNTRY_CODE, MAX_BUNDLE_ITEMS, ACTIVE) VALUES
 (1, 'X9_FORWARD_STD', 'X9_FORWARD_STD', '999999999', '111111111', 'DEST BANK', 'ORIG BANK', '35', 'T', 'US', 300, 1),
 (2, 'X9_RETURN_ICLR', 'X9_RETURN_ICLR', '111111111', '999999999', 'ORIG BANK', 'DEST BANK', '35', 'T', 'US', 300, 1);
 
 -- Seed: ADE_APPROVAL_RULES (6 rows)
-INSERT INTO ADE_APPROVAL_RULES (RULE_ID, COLLECTION_CODE, CORRECTION_TYPE, THRESHOLD_AMOUNT, REQUIRES_APPROVAL, ALLOWED_ROLES, ACTIVE) VALUES
+INSERT IGNORE INTO ADE_APPROVAL_RULES (RULE_ID, COLLECTION_CODE, CORRECTION_TYPE, THRESHOLD_AMOUNT, REQUIRES_APPROVAL, ALLOWED_ROLES, ACTIVE) VALUES
 (1, 'INCLFF', 'ENCODED_AMOUNT_CORRECTION', 500.00, 0, 'REPAIR_OPERATOR,SUPERVISOR', 1),
 (2, 'INCLFF', 'DATA_CORRECTION', 0.00, 0, 'REPAIR_OPERATOR,SUPERVISOR', 1),
 (3, 'INCLRF', 'ENCODED_AMOUNT_CORRECTION', 500.00, 0, 'REPAIR_OPERATOR,SUPERVISOR', 1),

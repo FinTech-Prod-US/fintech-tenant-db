@@ -5,7 +5,7 @@
 
 USE ${DB_NAME_BUSINESS_RULES};
 
-INSERT INTO BANK_MASTER_RT (RT, Name, Description, InclearingFlag, OnUsFlag)
+INSERT IGNORE INTO BANK_MASTER_RT (RT, Name, Description, InclearingFlag, OnUsFlag)
 VALUES
   ('026013356', 'Metropolitan Commercial Bank', 'MCB - Pilot Bank, New York NY', 'Y', 'Y'),
   ('021001208', 'Federal Reserve Bank of NY', 'FED - New York NY', 'Y', 'N'),

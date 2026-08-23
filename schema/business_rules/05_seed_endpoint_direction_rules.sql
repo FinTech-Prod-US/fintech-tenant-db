@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS ENDPOINT_DIRECTION_RULES (
 -- Items with any BR exception → RETURN
 -- ============================================================================
 
-INSERT INTO ENDPOINT_DIRECTION_RULES (COLLECTION_CODE, EXCEPTION_PATTERN, DIRECTION, PRIORITY, DESCRIPTION) VALUES
+INSERT IGNORE INTO ENDPOINT_DIRECTION_RULES (COLLECTION_CODE, EXCEPTION_PATTERN, DIRECTION, PRIORITY, DESCRIPTION) VALUES
 -- No exception = item passed all BR checks → FORWARD to clearing
 ('INCLFF', NULL, 'FORWARD', 100, 'INCLFF: Items with no exception go FORWARD to FED for clearing'),
 -- Specific exceptions → RETURN
