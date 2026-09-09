@@ -1,5 +1,5 @@
 tenant: mcb
-environment: prod
+environment: qa
 description: MCB tenant database configuration
 db_names:
   primary: mcb_check_payment_platform
