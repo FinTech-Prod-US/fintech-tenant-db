@@ -110,12 +110,21 @@ INSERT IGNORE INTO `COLLECTION_CODE_MASTER` (`COLLECTION_CODE`, `DESCRIPTION`, `
 ('INCLA', 'Incoming Clearing A', 'Y', '2026-04-02 00:15:34'),
 ('INCLB', 'Incoming Clearing B', 'Y', '2026-04-02 00:15:34');
 
--- Seed: COLLECTION_CODE_MICR (4 rows)
+-- Seed: COLLECTION_CODE_MICR (14 rows)
 INSERT IGNORE INTO `COLLECTION_CODE_MICR` (`Id`, `Coll_Type`, `Coll_Code`, `Bin#Start`, `Bin#End`, `BatchStart`, `BatchEnd`, `FileDeadline`, `Description`, `created_at`, `updated_at`, `source_code`, `work_type`) VALUES
-(1, '01', 'INCLFF', 1, 1000, 1, 1000, '17:00:00', 'FED Forward Presentment - Bin Range 0001-1000, Batch 0001-1000, 5PM Deadline', '2025-11-23 09:14:59', '2025-11-23 09:14:59', '01', '001'),
-(2, '01', 'INCLFB', 1001, 2000, 1, 1000, '22:00:00', 'Bank of America Forward Presentment - Bin Range 1001-2000, Batch 0001-1000, 10PM Deadline', '2025-11-23 09:14:59', '2025-11-23 09:14:59', '01', '002'),
-(3, '02', 'INCLRF', 2001, 3000, 1, 1000, NULL, 'FED Return Presentment - Bin Range 2001-3000, Batch 0001-1000, No Deadline', '2025-11-23 09:14:59', '2025-11-23 09:14:59', '03', '301'),
-(4, '02', 'INCRB', 3001, 4000, 1, 1000, NULL, 'Bank of America Return Presentment - Bin Range 3001-4000, Batch 0001-1000, No Deadline', '2025-11-23 09:14:59', '2025-11-23 09:14:59', '03', '302');
+(1,  '01', 'INCLFF',    1,     1000,  1, 1000, '17:00:00', 'FED Forward Presentment - Bin Range 0001-1000, Batch 0001-1000, 5PM Deadline',              '2025-11-23 09:14:59', '2025-11-23 09:14:59', '01', '001'),
+(2,  '01', 'INCLFB',    1001,  2000,  1, 1000, '22:00:00', 'Bank of America Forward Presentment - Bin Range 1001-2000, Batch 0001-1000, 10PM Deadline', '2025-11-23 09:14:59', '2025-11-23 09:14:59', '01', '002'),
+(3,  '02', 'INCLRF',    2001,  3000,  1, 1000, NULL,       'FED Return Presentment - Bin Range 2001-3000, Batch 0001-1000, No Deadline',                '2025-11-23 09:14:59', '2025-11-23 09:14:59', '03', '301'),
+(4,  '02', 'INCLRB',    3001,  4000,  1, 1000, NULL,       'Bank of America Return Presentment - Bin Range 3001-4000, Batch 0001-1000, No Deadline',    '2025-11-23 09:14:59', '2025-11-23 09:14:59', '03', '302'),
+(6,  '01', 'OUTCLFBR',  4001,  5000,  1, 1000, '17:00:00', 'POD Branch - Bin 4001-5000, 5PM Deadline',                                                 '2025-11-23 09:14:59', '2025-11-23 09:14:59', '02', '201'),
+(7,  '01', 'OUTCLFATM', 5001,  6000,  1, 1000, '20:00:00', 'POD ATM - Bin 5001-6000, 8PM Deadline',                                                    '2025-11-23 09:14:59', '2025-11-23 09:14:59', '02', '202'),
+(8,  '01', 'OUTCLFMOB', 6001,  7000,  1, 1000, '22:00:00', 'POD Mobile - Bin 6001-7000, 10PM Deadline',                                                '2025-11-23 09:14:59', '2025-11-23 09:14:59', '02', '203'),
+(9,  '01', 'OUTCLFRDC', 7001,  8000,  1, 1000, '17:00:00', 'POD RDC - Bin 7001-8000, 5PM Deadline',                                                    '2025-11-23 09:14:59', '2025-11-23 09:14:59', '02', '204'),
+(10, '01', 'OUTCLFLBX', 8001,  9000,  1, 1000, '15:00:00', 'POD Lockbox - Bin 8001-9000, 3PM Deadline',                                                '2025-11-23 09:14:59', '2025-11-23 09:14:59', '02', '205'),
+(11, '01', 'OUTCLFCOR', 9001,  10000, 1, 1000, '16:00:00', 'POD Correspondent - Bin 9001-10000, 4PM Deadline',                                         '2025-11-23 09:14:59', '2025-11-23 09:14:59', '02', '206'),
+(12, '03', 'OUTCLRDDA', 10001, 11000, 1, 1000, NULL,       'Outgoing Return DDA - Bin 10001-11000, No Deadline',                                       '2025-11-23 09:14:59', '2025-11-23 09:14:59', '04', '401'),
+(13, '03', 'OUTCLRCD',  11001, 12000, 1, 1000, NULL,       'Outgoing Return Card - Bin 11001-12000, No Deadline',                                      '2025-11-23 09:14:59', '2025-11-23 09:14:59', '04', '402'),
+(14, '03', 'OUTCLRLN',  12001, 13000, 1, 1000, NULL,       'Outgoing Return Loan - Bin 12001-13000, No Deadline',                                      '2025-11-23 09:14:59', '2025-11-23 09:14:59', '04', '403');
 
 -- Seed: COLLECTION_CODE_ORIGRT_REF (12 rows)
 INSERT IGNORE INTO `COLLECTION_CODE_ORIGRT_REF` (`Id`, `Coll_Type`, `OriginRT`, `Collection_Code`, `Description`, `created_at`, `updated_at`) VALUES
