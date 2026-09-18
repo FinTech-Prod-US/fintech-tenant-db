@@ -126,7 +126,7 @@ INSERT IGNORE INTO `COLLECTION_CODE_MICR` (`Id`, `Coll_Type`, `Coll_Code`, `Bin#
 (13, '03', 'OUTCLRCD',  11001, 12000, 1, 1000, NULL,       'Outgoing Return Card - Bin 11001-12000, No Deadline',                                      '2025-11-23 09:14:59', '2025-11-23 09:14:59', '04', '402'),
 (14, '03', 'OUTCLRLN',  12001, 13000, 1, 1000, NULL,       'Outgoing Return Loan - Bin 12001-13000, No Deadline',                                      '2025-11-23 09:14:59', '2025-11-23 09:14:59', '04', '403');
 
--- Seed: COLLECTION_CODE_ORIGRT_REF (12 rows)
+-- Seed: COLLECTION_CODE_ORIGRT_REF (18 rows)
 INSERT IGNORE INTO `COLLECTION_CODE_ORIGRT_REF` (`Id`, `Coll_Type`, `OriginRT`, `Collection_Code`, `Description`, `created_at`, `updated_at`) VALUES
 (1, '01', '021001208', 'INCLFF', 'Inclearing file from FED - Forward Presentment', '2025-11-23 09:14:45', '2025-11-23 09:14:45'),
 (2, '01', '026009593', 'INCLFB', 'Inclearing file from Bank of America - Forward Presentment', '2025-11-23 09:14:45', '2025-11-23 09:14:45'),
@@ -139,7 +139,17 @@ INSERT IGNORE INTO `COLLECTION_CODE_ORIGRT_REF` (`Id`, `Coll_Type`, `OriginRT`, 
 (9, '02', '111000025', 'INCLRF', 'Inclearing file from Bank of America - Return Presentment', '2025-11-23 09:14:45', '2025-11-23 09:14:45'),
 (10, '02', '121000248', 'INCLRF', 'Inclearing file from Wells Fargo - Return Presentment', '2025-11-23 09:14:45', '2025-11-23 09:14:45'),
 (11, '01', '026073150', 'INCLFF', 'Test file', '2025-12-14 09:08:47', '2025-12-14 09:08:47'),
-(12, '01', '123456780', 'INCLFF', 'One Item File', '2026-04-20 18:02:55', '2026-04-20 18:02:55');
+(12, '01', '123456780', 'INCLFF', 'One Item File', '2026-04-20 18:02:55', '2026-04-20 18:02:55'),
+-- V0.8 (BRE PR #10): POD (Proof of Deposit) forward-presentment collection codes
+-- for the TAE channels. Each channel's TAE x9Config.originRT (see ECS_TAEEngine
+-- seed) maps here to a distinct collection code so downstream enrichment/BIN
+-- assignment can tell the channels apart. RTs are ABA-check-digit valid.
+(13, '01', '061000146', 'OUTCLFBR',  'POD - Branch Teller Deposit (Forward to FED)', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+(14, '01', '061000159', 'OUTCLFATM', 'POD - ATM Check Deposit (Forward to FED)', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+(15, '01', '061000162', 'OUTCLFMOB', 'POD - Mobile Check Deposit (Forward to FED)', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+(16, '01', '061000175', 'OUTCLFRDC', 'POD - Remote Deposit Capture (Forward to FED)', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+(17, '01', '061000188', 'OUTCLFLBX', 'POD - Lockbox Deposit (Forward to FED)', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+(18, '01', '061000191', 'OUTCLFCOR', 'POD - Correspondent Bank Deposit (Forward to FED)', '2026-01-01 00:00:00', '2026-01-01 00:00:00');
 
 -- Seed: COLLECTION_CODE_UD_REF (17 rows)
 INSERT IGNORE INTO `COLLECTION_CODE_UD_REF` (`Id`, `Coll_Type`, `OriginRT`, `UserField`, `FedWorkType`, `Coll_Code`, `Description`, `created_at`, `updated_at`) VALUES
