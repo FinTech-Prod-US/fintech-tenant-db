@@ -19,6 +19,16 @@
 -- NOTE: no USE statement — apply this against the active tenant DB (e.g.
 -- mcb_check_payment_platform locally). Piping into the target DB keeps it portable.
 
+-- Add TRACKING_NUMBER to EIE_RETURN_ITEM (idempotent) — carries the item's
+-- PAYMENT_TRACKING_NUMBER so the X9 builder can resolve images at build time.
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_NAME='EIE_RETURN_ITEM' AND COLUMN_NAME='TRACKING_NUMBER'
+               AND TABLE_SCHEMA = DATABASE());
+SET @ddl := IF(@col = 0,
+  'ALTER TABLE EIE_RETURN_ITEM ADD COLUMN TRACKING_NUMBER VARCHAR(50) AFTER ORIGINAL_ITEM_ID',
+  'SELECT 1');
+PREPARE s FROM @ddl; EXECUTE s; DEALLOCATE PREPARE s;
+
 -- Return-code mappings already seeded in 04_eie_schema_and_seed.sql; re-assert
 -- the core DDA posting exceptions in case this file is run standalone.
 INSERT INTO EIE_RETURN_CODE_MAPPING (BANK_ID, SOURCE_CODE, SOURCE_DESCRIPTION, X9_RETURN_CODE, X9_DESCRIPTION) VALUES
@@ -44,6 +54,7 @@ INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_J
   "fileConfig": {"format": "CSV", "encoding": "UTF-8", "delimiter": ",", "quoteChar": "\\"", "hasHeader": true},
   "fieldMapping": {"fields": [
     {"name": "transactionId", "column": "TXN_ID", "type": "string"},
+    {"name": "trackingNumber", "column": "TRACKING_NUM", "type": "string"},
     {"name": "payorRT", "column": "ROUTING_NUM", "type": "string"},
     {"name": "payorAccount", "column": "ACCOUNT_NUM", "type": "string"},
     {"name": "serialNumber", "column": "CHECK_NUM", "type": "string"},
@@ -52,7 +63,7 @@ INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_J
     {"name": "returnDate", "column": "RETURN_DATE", "type": "date", "format": "yyyy-MM-dd"},
     {"name": "postingDate", "column": "POSTING_DATE", "type": "date", "format": "yyyy-MM-dd"}
   ]},
-  "imageResolution": {"mode": "API_LOOKUP", "lookupField": "transactionId", "dataServicesUrl": "http://accs-data-services:8084", "imagePath": "/api/v1/items/{id}/images"},
+  "imageResolution": {"mode": "RESOLVE", "trackingField": "trackingNumber", "dataServicesUrl": "http://accs-data-services:8084", "resolvePath": "/api/v1/items/resolve-image"},
   "s3Config": {"inputPrefix": "exception-files/core-banking-dda/", "processedPrefix": "exception-files/core-banking-dda/processed/", "failedPrefix": "exception-files/core-banking-dda/failed/"},
   "batchConfig": {"maxItemCount": 100, "maxWaitMinutes": 15, "groupByDestinationRT": true, "maxCashLetterItems": 200},
   "x9Config": {
@@ -69,7 +80,7 @@ INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_J
       "returnDetail": {"returnNotificationIndicator": "1", "archiveTypeIndicator": ""}
     },
     "x9FieldMapping": {"returnDetail": {
-      "payorBankRoutingNumber": "$payorRT", "payorBankCheckDigit": "", "onUs": "$payorAccount/$serialNumber",
+      "payorBankRoutingNumber": "$payorRT8", "payorBankCheckDigit": "$payorCheckDigit", "onUs": "$payorAccount/$serialNumber",
       "itemAmount": "$amountCents", "returnReason": "$x9ReturnCode",
       "eceInstitutionItemSequenceNumber": "$sequenceNumber",
       "returnNotificationIndicator": "1", "archiveTypeIndicator": "", "addendumCount": 1
@@ -89,6 +100,7 @@ INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_J
   "fileConfig": {"format": "JSON", "encoding": "UTF-8", "recordsPath": "returns"},
   "fieldMapping": {"fields": [
     {"name": "transactionId", "jsonPath": "txnId", "type": "string"},
+    {"name": "trackingNumber", "jsonPath": "trackingNumber", "type": "string"},
     {"name": "payorRT", "jsonPath": "routingNumber", "type": "string"},
     {"name": "payorAccount", "jsonPath": "accountNumber", "type": "string"},
     {"name": "serialNumber", "jsonPath": "checkSerial", "type": "string"},
@@ -97,7 +109,7 @@ INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_J
     {"name": "returnDate", "jsonPath": "returnDate", "type": "date", "format": "yyyy-MM-dd"},
     {"name": "postingDate", "jsonPath": "postingDate", "type": "date", "format": "yyyy-MM-dd"}
   ]},
-  "imageResolution": {"mode": "API_LOOKUP", "lookupField": "transactionId", "dataServicesUrl": "http://accs-data-services:8084", "imagePath": "/api/v1/items/{id}/images"},
+  "imageResolution": {"mode": "RESOLVE", "trackingField": "trackingNumber", "dataServicesUrl": "http://accs-data-services:8084", "resolvePath": "/api/v1/items/resolve-image"},
   "s3Config": {"inputPrefix": "exception-files/core-banking-dda-json/", "processedPrefix": "exception-files/core-banking-dda-json/processed/", "failedPrefix": "exception-files/core-banking-dda-json/failed/"},
   "batchConfig": {"maxItemCount": 100, "maxWaitMinutes": 15, "groupByDestinationRT": true, "maxCashLetterItems": 200},
   "x9Config": {
@@ -114,7 +126,7 @@ INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_J
       "returnDetail": {"returnNotificationIndicator": "1", "archiveTypeIndicator": ""}
     },
     "x9FieldMapping": {"returnDetail": {
-      "payorBankRoutingNumber": "$payorRT", "payorBankCheckDigit": "", "onUs": "$payorAccount/$serialNumber",
+      "payorBankRoutingNumber": "$payorRT8", "payorBankCheckDigit": "$payorCheckDigit", "onUs": "$payorAccount/$serialNumber",
       "itemAmount": "$amountCents", "returnReason": "$x9ReturnCode",
       "eceInstitutionItemSequenceNumber": "$sequenceNumber",
       "returnNotificationIndicator": "1", "archiveTypeIndicator": "", "addendumCount": 1
@@ -141,9 +153,10 @@ INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_J
     {"name": "returnCode", "start": 77, "end": 80, "type": "string", "trim": true},
     {"name": "returnDate", "start": 81, "end": 88, "type": "date", "format": "yyyyMMdd"},
     {"name": "originalFileId", "start": 89, "end": 100, "type": "long"},
-    {"name": "originalItemSeq", "start": 101, "end": 106, "type": "int"}
+    {"name": "originalItemSeq", "start": 101, "end": 106, "type": "int"},
+    {"name": "trackingNumber", "start": 107, "end": 156, "type": "string", "trim": true}
   ]},
-  "imageResolution": {"mode": "API_LOOKUP", "lookupField": "transactionId", "dataServicesUrl": "http://accs-data-services:8084", "imagePath": "/api/v1/items/{id}/images"},
+  "imageResolution": {"mode": "RESOLVE", "trackingField": "trackingNumber", "dataServicesUrl": "http://accs-data-services:8084", "resolvePath": "/api/v1/items/resolve-image"},
   "s3Config": {"inputPrefix": "exception-files/core-banking-dda-flat/", "processedPrefix": "exception-files/core-banking-dda-flat/processed/", "failedPrefix": "exception-files/core-banking-dda-flat/failed/"},
   "batchConfig": {"maxItemCount": 100, "maxWaitMinutes": 15, "groupByDestinationRT": true, "maxCashLetterItems": 200},
   "x9Config": {
@@ -160,7 +173,7 @@ INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_J
       "returnDetail": {"returnNotificationIndicator": "1", "archiveTypeIndicator": ""}
     },
     "x9FieldMapping": {"returnDetail": {
-      "payorBankRoutingNumber": "$payorRT", "payorBankCheckDigit": "", "onUs": "$payorAccount/$serialNumber",
+      "payorBankRoutingNumber": "$payorRT8", "payorBankCheckDigit": "$payorCheckDigit", "onUs": "$payorAccount/$serialNumber",
       "itemAmount": "$amountCents", "returnReason": "$x9ReturnCode",
       "eceInstitutionItemSequenceNumber": "$sequenceNumber",
       "returnNotificationIndicator": "1", "archiveTypeIndicator": "", "addendumCount": 1
