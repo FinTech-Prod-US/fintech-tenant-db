@@ -25,11 +25,11 @@ INSERT IGNORE INTO COLLECTION_CODE_ORIGRT_REF (Coll_Type, OriginRT, Collection_C
 ('02', '041000124', 'INCLRB',  'Inclearing file from KeyBank - Return Presentment (Bank)');
 
 -- COLLECTION_CODE_MICR — BIN range assignments for inclearing
-INSERT IGNORE INTO COLLECTION_CODE_MICR (Coll_Type, Coll_Code, `Bin#Start`, `Bin#End`, BatchStart, BatchEnd, FileDeadline, Description) VALUES
-('01', 'INCLFF',  1,    1000, 1, 1000, '17:00:00', 'FED Forward Presentment - Bin Range 0001-1000, 5PM Deadline'),
-('01', 'INCLFB',  1001, 2000, 1, 1000, '22:00:00', 'Bank Forward Presentment - Bin Range 1001-2000, 10PM Deadline'),
-('02', 'INCLRF',  2001, 3000, 1, 1000, NULL,       'FED Return Presentment - Bin Range 2001-3000, No Deadline'),
-('02', 'INCLRB',  3001, 4000, 1, 1000, NULL,       'Bank Return Presentment - Bin Range 3001-4000, No Deadline');
+INSERT IGNORE INTO COLLECTION_CODE_MICR (Coll_Type, Coll_Code, `Bin#Start`, `Bin#End`, BatchStart, BatchEnd, FileDeadline, Description, source_code, work_type) VALUES
+('01', 'INCLFF',  1,    1000, 1, 1000, '17:00:00', 'FED Forward Presentment - Bin Range 0001-1000, 5PM Deadline', '01', '001'),
+('01', 'INCLFB',  1001, 2000, 1, 1000, '22:00:00', 'Bank Forward Presentment - Bin Range 1001-2000, 10PM Deadline', '01', '002'),
+('02', 'INCLRF',  2001, 3000, 1, 1000, NULL,       'FED Return Presentment - Bin Range 2001-3000, No Deadline', '03', '301'),
+('02', 'INCLRB',  3001, 4000, 1, 1000, NULL,       'Bank Return Presentment - Bin Range 3001-4000, No Deadline', '03', '302');
 
 -- COLLECTION_CODE_UD_REF — UserField/FedWorkType mapping for inclearing
 INSERT IGNORE INTO COLLECTION_CODE_UD_REF (Coll_Type, OriginRT, UserField, FedWorkType, Coll_Code, Description) VALUES
@@ -59,14 +59,13 @@ INSERT IGNORE INTO COLLECTION_CODE_ORIGRT_REF (Coll_Type, OriginRT, Collection_C
 ('01', '061000145', 'OUTCLFCOR', 'POD - Correspondent Bank Deposit (Forward to FED)');
 
 -- COLLECTION_CODE_MICR — BIN range assignments per POD channel
--- Note: source_code and work_type columns are added separately (ALTER TABLE) for local dev
-INSERT IGNORE INTO COLLECTION_CODE_MICR (Coll_Type, Coll_Code, `Bin#Start`, `Bin#End`, BatchStart, BatchEnd, FileDeadline, Description) VALUES
-('01', 'OUTCLFBR',  4001, 5000, 1, 1000, '17:00:00', 'POD Branch - Bin 4001-5000, 5PM Deadline'),
-('01', 'OUTCLFATM', 5001, 6000, 1, 1000, '20:00:00', 'POD ATM - Bin 5001-6000, 8PM Deadline'),
-('01', 'OUTCLFMOB', 6001, 7000, 1, 1000, '22:00:00', 'POD Mobile - Bin 6001-7000, 10PM Deadline'),
-('01', 'OUTCLFRDC', 7001, 8000, 1, 1000, '17:00:00', 'POD RDC - Bin 7001-8000, 5PM Deadline'),
-('01', 'OUTCLFLBX', 8001, 9000, 1, 1000, '15:00:00', 'POD Lockbox - Bin 8001-9000, 3PM Deadline'),
-('01', 'OUTCLFCOR', 9001, 10000, 1, 1000, '16:00:00', 'POD Correspondent - Bin 9001-10000, 4PM Deadline');
+INSERT IGNORE INTO COLLECTION_CODE_MICR (Coll_Type, Coll_Code, `Bin#Start`, `Bin#End`, BatchStart, BatchEnd, FileDeadline, Description, source_code, work_type) VALUES
+('01', 'OUTCLFBR',  4001, 5000, 1, 1000, '17:00:00', 'POD Branch - Bin 4001-5000, 5PM Deadline', '02', '201'),
+('01', 'OUTCLFATM', 5001, 6000, 1, 1000, '20:00:00', 'POD ATM - Bin 5001-6000, 8PM Deadline', '02', '202'),
+('01', 'OUTCLFMOB', 6001, 7000, 1, 1000, '22:00:00', 'POD Mobile - Bin 6001-7000, 10PM Deadline', '02', '203'),
+('01', 'OUTCLFRDC', 7001, 8000, 1, 1000, '17:00:00', 'POD RDC - Bin 7001-8000, 5PM Deadline', '02', '204'),
+('01', 'OUTCLFLBX', 8001, 9000, 1, 1000, '15:00:00', 'POD Lockbox - Bin 8001-9000, 3PM Deadline', '02', '205'),
+('01', 'OUTCLFCOR', 9001, 10000, 1, 1000, '16:00:00', 'POD Correspondent - Bin 9001-10000, 4PM Deadline', '02', '206');
 
 -- COLLECTION_CODE_UD_REF — UserField/FedWorkType mapping (blank UserField, FedWorkType C)
 INSERT IGNORE INTO COLLECTION_CODE_UD_REF (Coll_Type, OriginRT, UserField, FedWorkType, Coll_Code, Description) VALUES
@@ -90,10 +89,10 @@ INSERT IGNORE INTO COLLECTION_CODE_ORIGRT_REF (Coll_Type, OriginRT, Collection_C
 ('03', '071000142', 'OUTCLRLN',  'Outgoing Return - Loan System (Loan Exceptions)');
 
 -- COLLECTION_CODE_MICR — BIN range assignments for outgoing returns
-INSERT IGNORE INTO COLLECTION_CODE_MICR (Coll_Type, Coll_Code, `Bin#Start`, `Bin#End`, BatchStart, BatchEnd, FileDeadline, Description) VALUES
-('03', 'OUTCLRDDA', 10001, 11000, 1, 1000, NULL, 'Outgoing Return DDA - Bin 10001-11000, No Deadline'),
-('03', 'OUTCLRCD',  11001, 12000, 1, 1000, NULL, 'Outgoing Return Card - Bin 11001-12000, No Deadline'),
-('03', 'OUTCLRLN',  12001, 13000, 1, 1000, NULL, 'Outgoing Return Loan - Bin 12001-13000, No Deadline');
+INSERT IGNORE INTO COLLECTION_CODE_MICR (Coll_Type, Coll_Code, `Bin#Start`, `Bin#End`, BatchStart, BatchEnd, FileDeadline, Description, source_code, work_type) VALUES
+('03', 'OUTCLRDDA', 10001, 11000, 1, 1000, NULL, 'Outgoing Return DDA - Bin 10001-11000, No Deadline', '04', '401'),
+('03', 'OUTCLRCD',  11001, 12000, 1, 1000, NULL, 'Outgoing Return Card - Bin 11001-12000, No Deadline', '04', '402'),
+('03', 'OUTCLRLN',  12001, 13000, 1, 1000, NULL, 'Outgoing Return Loan - Bin 12001-13000, No Deadline', '04', '403');
 
 -- COLLECTION_CODE_UD_REF — UserField/FedWorkType mapping (blank UserField, FedWorkType C)
 INSERT IGNORE INTO COLLECTION_CODE_UD_REF (Coll_Type, OriginRT, UserField, FedWorkType, Coll_Code, Description) VALUES
