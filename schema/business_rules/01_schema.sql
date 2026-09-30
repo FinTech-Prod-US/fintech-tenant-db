@@ -151,6 +151,7 @@ CREATE TABLE `COLLECTION_CODE_MICR` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`Id`),
+  UNIQUE KEY `uk_micr_coll` (`Coll_Type`,`Coll_Code`),
   KEY `idx_micr_lookup` (`Coll_Type`,`Coll_Code`),
   KEY `idx_bin_range` (`Bin#Start`,`Bin#End`),
   KEY `idx_batch_range` (`BatchStart`,`BatchEnd`)

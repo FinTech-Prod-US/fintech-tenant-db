@@ -128,11 +128,18 @@ UPDATE WORKFLOW_MASTER SET
           "description": "Initialize item enrichment output fields"
         },
         {
+          "id": "skip_credit_ticket",
+          "type": "condition",
+          "when": "$ctx.currentItem.origMicrAuxonus == ''CREDIT'' OR $ctx.currentItem.debitCreditInd == ''C''",
+          "then": { "goto": "end_credit_ticket" },
+          "description": "Deposit slip / credit ticket (Type 25 AUXONUS CREDIT) is not a payor check"
+        },
+        {
           "id": "validate_rt_via_moov_fed",
           "type": "api_lookup",
           "apiAlias": "moov_fed_ach_search",
           "method": "GET",
-          "url": "http://accs-moov-fed:8086/fed/ach/search?routingNumber=:rt",
+          "url": "http://moov-io-fed-accs:8086/fed/ach/search?routingNumber=:rt",
           "params": { "rt": "$ctx.currentItem.RT" },
           "responseMapping": {
             "participants": "achParticipants"
@@ -328,6 +335,11 @@ UPDATE WORKFLOW_MASTER SET
           "on_zero_match": { "goto": "end_with_posting_code_error" },
           "on_error": { "goto": "end_with_posting_code_error" },
           "description": "Step 6: Posting Code lookup by RT + AccountClass. For OnUs items uses AccountClass from Account Master, for transit items uses DDA default"
+        },
+        {
+          "id": "end_credit_ticket",
+          "type": "return",
+          "return": { "enrichmentStatus": "SUCCESS", "exceptionCode": null, "exceptionDetails": null, "ErrorCode": 0, "Exception": "NONE" }
         },
         {
           "id": "end_success",

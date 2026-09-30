@@ -399,18 +399,21 @@ CREATE TABLE `ENGINE_ERROR_LOG` (
 -- Table: EXCEPTION_MASTER (27 rows)
 DROP TABLE IF EXISTS `EXCEPTION_MASTER`;
 CREATE TABLE `EXCEPTION_MASTER` (
+  `exception_id` int NOT NULL AUTO_INCREMENT,
   `exception_code` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
   `exception_name` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `exception_category` enum('FRAUD','POSTING','IMAGE') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `priority_band` enum('P0','P1','P2','P3','P4') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception_category` enum('FRAUD','POSTING','IMAGE') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `priority_band` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `rank_in_band` int NOT NULL,
   `ops_repairable_flag` tinyint(1) NOT NULL DEFAULT '0',
   `default_queue` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `default_x9_code` char(1) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `active_flag` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`exception_code`),
+  UNIQUE KEY `uk_exception_id` (`exception_id`),
   UNIQUE KEY `uk_exception_rank` (`priority_band`,`rank_in_band`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -79,10 +79,39 @@ def ensure_databases_exist(connection, rendered_dir: Path) -> None:
     connection.commit()
 
 
+_DROP_TABLE_RE = re.compile(
+    r"^DROP\s+TABLE\s+(IF\s+EXISTS\s+)?`?[\w]+`?\s*;[ \t]*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+_CREATE_TABLE_RE = re.compile(
+    r"^CREATE\s+TABLE\s+(?!IF\s+NOT\s+EXISTS)",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def sanitize_for_reapply(content: str, allow_drop: bool) -> str:
+    """Keep existing data on Jenkins/local re-apply.
+
+    Schema dumps ship as DROP TABLE IF EXISTS + CREATE TABLE. Running that
+    on every deploy wipes tenant data. Default is to skip DROP TABLE and
+    use CREATE TABLE IF NOT EXISTS. Pass allow_drop=True only for a
+    first-time empty bootstrap.
+    """
+    if allow_drop:
+        return content
+    content = _DROP_TABLE_RE.sub(
+        lambda m: "-- skipped DROP TABLE (re-apply safe): " + m.group(0).strip(),
+        content,
+    )
+    content = _CREATE_TABLE_RE.sub("CREATE TABLE IF NOT EXISTS ", content)
+    return content
+
+
 def execute_sql_file(
     connection,
     file_path: Path,
     dry_run: bool,
+    allow_drop: bool = False,
 ) -> None:
     print(f"  {'[dry-run] ' if dry_run else ''}{file_path}")
     if dry_run:
@@ -91,6 +120,8 @@ def execute_sql_file(
     content = file_path.read_text(encoding="utf-8")
     if not content.strip():
         return
+
+    content = sanitize_for_reapply(content, allow_drop=allow_drop)
 
     # The source schema/seed files may have foreign-key references to tables that
     # are created later in the same batch, and seed files may contain JSON strings
@@ -115,6 +146,7 @@ def apply(
     mysql_user: str,
     mysql_password: str,
     dry_run: bool,
+    allow_drop: bool = False,
 ) -> int:
     schema_files, tenant_files = discover_sql_files(rendered_dir)
     all_files = schema_files + tenant_files
@@ -146,7 +178,7 @@ def apply(
     try:
         ensure_databases_exist(connection, rendered_dir)
         for file_path in all_files:
-            execute_sql_file(connection, file_path, dry_run)
+            execute_sql_file(connection, file_path, dry_run, allow_drop=allow_drop)
         print("All SQL files applied successfully")
     finally:
         connection.close()
@@ -171,6 +203,11 @@ def main() -> int:
         action="store_true",
         help="Print execution plan without applying",
     )
+    parser.add_argument(
+        "--allow-drop",
+        action="store_true",
+        help="Execute DROP TABLE statements (empty bootstrap only). Default skips DROP TABLE so re-deploys keep tenant data.",
+    )
     args = parser.parse_args()
 
     if not args.rendered_dir.exists():
@@ -184,6 +221,7 @@ def main() -> int:
         args.mysql_user,
         args.mysql_password,
         args.dry_run,
+        allow_drop=args.allow_drop,
     )
 
 
