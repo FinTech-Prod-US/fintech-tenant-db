@@ -765,6 +765,7 @@ CREATE TABLE `ITEM_DETAILS_ENRICHED` (
   `OPS_NOTES` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `OPS_DECISION_TIMESTAMP` datetime DEFAULT NULL,
   `DISPOSITION_STATUS` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `CDE_REPAIR_STATUS` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Payment-repair operator verdict (OPERATOR_APPROVED/OPERATOR_REJECTED); kept separate from IQV_STATUS which is the image-quality verdict',
   `CL_BUILD_STATUS` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Build request ID that reserved this item',
   `CL_FILE_SESSION_ID` bigint DEFAULT NULL COMMENT 'FK to cl_file_session',
   `CL_FILE_ID` bigint DEFAULT NULL COMMENT 'FK to cl_x9_file',
