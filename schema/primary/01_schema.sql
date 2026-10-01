@@ -675,6 +675,7 @@ CREATE TABLE `ITEM_DETAILS` (
   `BOFD_ORIG_RT` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ORIG_MICR_ACCOUNT` varchar(31) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ORIG_MICR_SERIAL` varchar(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `BUSINESS_DAY_POSTED` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 if amount already added to BUSINESS_DAY totals',
   PRIMARY KEY (`PAYMENT_ID`),
   KEY `BDAY_ID` (`BDAY_ID`),
   KEY `FILE_ID` (`FILE_ID`),

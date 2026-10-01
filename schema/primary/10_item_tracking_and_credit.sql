@@ -41,4 +41,16 @@ PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+SET @col := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'ITEM_DETAILS'
+    AND COLUMN_NAME = 'BUSINESS_DAY_POSTED'
+);
+SET @sql := IF(@col = 0,
+  'ALTER TABLE ITEM_DETAILS ADD COLUMN BUSINESS_DAY_POSTED tinyint(1) NOT NULL DEFAULT 0 COMMENT ''1 if amount already added to BUSINESS_DAY totals''',
+  'SELECT ''ITEM_DETAILS.BUSINESS_DAY_POSTED exists'' AS result');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 SELECT 'item tracking and credit columns applied' AS result;
