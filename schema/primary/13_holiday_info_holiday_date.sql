@@ -1,0 +1,37 @@
+-- ============================================================================
+-- HOLIDAY_INFO.HOLIDAY_DATE — FDE ProcessingBusinessDayService
+-- Run against: ${DB_NAME_PRIMARY}
+-- FDE query: SELECT HOLIDAY_DATE, IS_ACTIVE FROM ${DB_NAME_ACCS}.HOLIDAY_INFO
+-- BRE query uses BUSINESS_DATE on business_rules.HOLIDAY_INFO (see 15_holiday_info.sql)
+-- ============================================================================
+USE ${DB_NAME_PRIMARY};
+
+SET @col := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'HOLIDAY_INFO'
+    AND COLUMN_NAME = 'HOLIDAY_DATE'
+);
+SET @sql := IF(@col = 0,
+  'ALTER TABLE HOLIDAY_INFO ADD COLUMN HOLIDAY_DATE DATE NULL COMMENT ''Same calendar day as BUSINESS_DATE (FDE getHolidayByDate)''',
+  'SELECT ''HOLIDAY_INFO.HOLIDAY_DATE exists'' AS result');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+UPDATE HOLIDAY_INFO
+   SET HOLIDAY_DATE = BUSINESS_DATE
+ WHERE HOLIDAY_DATE IS NULL AND BUSINESS_DATE IS NOT NULL;
+
+SET @idx := (
+  SELECT COUNT(*) FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'HOLIDAY_INFO'
+    AND INDEX_NAME = 'IDX_HOLIDAY_INFO_HOLIDAY_DATE'
+);
+SET @sql := IF(@idx = 0,
+  'ALTER TABLE HOLIDAY_INFO ADD KEY IDX_HOLIDAY_INFO_HOLIDAY_DATE (HOLIDAY_DATE, IS_ACTIVE)',
+  'SELECT ''IDX_HOLIDAY_INFO_HOLIDAY_DATE exists'' AS result');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SELECT 'HOLIDAY_INFO.HOLIDAY_DATE applied' AS result;
