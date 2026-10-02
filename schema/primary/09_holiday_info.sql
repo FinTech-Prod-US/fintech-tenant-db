@@ -13,14 +13,16 @@ USE ${DB_NAME_PRIMARY};
 
 CREATE TABLE IF NOT EXISTS `HOLIDAY_INFO` (
     `HOLIDAY_ID`    INT             NOT NULL AUTO_INCREMENT,
-    `BUSINESS_DATE` DATE            NOT NULL COMMENT 'The holiday / non-processing date',
+    `BUSINESS_DATE` DATE            NOT NULL COMMENT 'The holiday / non-processing date (BRE lookupHoliday)',
+    `HOLIDAY_DATE`  DATE            NULL     COMMENT 'Same calendar day as BUSINESS_DATE (FDE getHolidayByDate)',
     `REASON`        VARCHAR(255)    NULL     COMMENT 'Human-readable holiday name/reason',
     `CREATED_AT`    TIMESTAMP       NULL     DEFAULT NULL,
     `UPDATED_AT`    TIMESTAMP       NULL     DEFAULT NULL,
     `IS_ACTIVE`     TINYINT(1)      NULL     DEFAULT 1 COMMENT '1 = active holiday, 0 = disabled',
     PRIMARY KEY (`HOLIDAY_ID`),
     UNIQUE KEY `UK_HOLIDAY_INFO_BUSINESS_DATE` (`BUSINESS_DATE`),
-    KEY `IDX_HOLIDAY_INFO_ACTIVE_DATE` (`IS_ACTIVE`, `BUSINESS_DATE`)
+    KEY `IDX_HOLIDAY_INFO_ACTIVE_DATE` (`IS_ACTIVE`, `BUSINESS_DATE`),
+    KEY `IDX_HOLIDAY_INFO_HOLIDAY_DATE` (`HOLIDAY_DATE`, `IS_ACTIVE`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SELECT 'HOLIDAY_INFO table provisioned' AS result;
