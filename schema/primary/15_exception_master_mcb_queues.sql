@@ -26,7 +26,7 @@ UPDATE EXCEPTION_MASTER
 SET default_queue = 'MCB_FROM_CDE_TO_SUPERVISOR_APPROVAL'
 WHERE default_queue = 'FROM_CDE_TO_SUPERVISOR_APPROVAL';
 
-SELECT default_queue, COUNT(*) AS rows
+SELECT default_queue, COUNT(*) AS row_count
 FROM EXCEPTION_MASTER
 GROUP BY default_queue
 ORDER BY default_queue;
