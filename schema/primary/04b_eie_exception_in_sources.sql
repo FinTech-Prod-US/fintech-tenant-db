@@ -49,12 +49,12 @@ INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_J
     "destinationRT": "026013356",
     "originName": "Federal Reserve",
     "destinationName": "Metropolitan Commercial Bank",
-    "collectionTypeIndicator": "2",
+    "collectionTypeIndicator": "02",
     "maxCashLetterItems": 200,
     "maxItemsPerBundle": 50,
     "fieldDefaults": {
       "fileHeader": {"standardLevel": "03", "testIndicator": "T", "resendIndicator": "N", "countryCode": "US"},
-      "cashLetterHeader": {"collectionTypeIndicator": "2", "recordTypeIndicator": "I", "documentationTypeIndicator": "G", "fedWorkType": "C"},
+      "cashLetterHeader": {"collectionTypeIndicator": "02", "recordTypeIndicator": "I", "documentationTypeIndicator": "G", "fedWorkType": "C"},
       "returnDetail": {"returnNotificationIndicator": "1", "archiveTypeIndicator": ""}
     },
     "x9FieldMapping": {"returnDetail": {
@@ -93,12 +93,12 @@ INSERT INTO EIE_SOURCE_CONFIG (BANK_ID, SOURCE_ID, SOURCE_NAME, ACTIVE, CONFIG_J
     "destinationRT": "026013356",
     "originName": "KeyBank (SVPCO)",
     "destinationName": "Metropolitan Commercial Bank",
-    "collectionTypeIndicator": "2",
+    "collectionTypeIndicator": "02",
     "maxCashLetterItems": 200,
     "maxItemsPerBundle": 50,
     "fieldDefaults": {
       "fileHeader": {"standardLevel": "03", "testIndicator": "T", "resendIndicator": "N", "countryCode": "US"},
-      "cashLetterHeader": {"collectionTypeIndicator": "2", "recordTypeIndicator": "I", "documentationTypeIndicator": "G", "fedWorkType": "C"},
+      "cashLetterHeader": {"collectionTypeIndicator": "02", "recordTypeIndicator": "I", "documentationTypeIndicator": "G", "fedWorkType": "C"},
       "returnDetail": {"returnNotificationIndicator": "1", "archiveTypeIndicator": ""}
     },
     "x9FieldMapping": {"returnDetail": {
