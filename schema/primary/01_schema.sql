@@ -295,7 +295,7 @@ CREATE TABLE `CL_FILE_PROFILE` (
 DROP TABLE IF EXISTS `CL_FILE_SESSION`;
 CREATE TABLE `CL_FILE_SESSION` (
   `FILE_SESSION_ID` bigint NOT NULL AUTO_INCREMENT,
-  `SESSION_KEY_HASH` varchar(64) NOT NULL,
+  `SESSION_KEY_HASH` varchar(80) NOT NULL, -- 64-char sha256 + ':<sessionId>' rotation suffix for closed sessions (see CL engine findOrCreateFileSession)
   `BUSINESS_DATE` date NOT NULL,
   `FLOW_TYPE` varchar(10) NOT NULL COMMENT 'FORWARD or RETURN',
   `ENDPOINT_RT` varchar(9) NOT NULL,

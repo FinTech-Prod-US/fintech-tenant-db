@@ -27,11 +27,16 @@ ON DUPLICATE KEY UPDATE EndpointRT = '999999999', EndpointNetwork = 'KILL', Stat
 -- a single catch-all per code.
 DELETE FROM ENDPOINT_DIRECTION_RULES WHERE COLLECTION_CODE IN ('INCLRF', 'INCLRB');
 
+-- EXCEPTION_PATTERN='*' (catch-all), NOT NULL: returned deposited items are ALWAYS
+-- carried as an exception (exceptionCode=RETURNED_DEPOSIT from the CDE match rule),
+-- so a NULL (no-exception) pattern would never match and the direction lookup would
+-- fall through to its FORWARD default. '*' matches regardless of exception code,
+-- which is correct here because these flows are unconditionally terminal returns.
 INSERT INTO ENDPOINT_DIRECTION_RULES
   (COLLECTION_CODE, EXCEPTION_PATTERN, DIRECTION, PRIORITY, DESCRIPTION, ACTIVE)
 VALUES
-  ('INCLRF', NULL, 'RETURN', 100, 'INCLRF: returned deposited item (Fed) is terminal -> RETURN/KILL', 1),
-  ('INCLRB', NULL, 'RETURN', 100, 'INCLRB: returned deposited item (bank via SVPCO) is terminal -> RETURN/KILL', 1);
+  ('INCLRF', '*', 'RETURN', 100, 'INCLRF: returned deposited item (Fed) is terminal -> RETURN/KILL', 1),
+  ('INCLRB', '*', 'RETURN', 100, 'INCLRB: returned deposited item (bank via SVPCO) is terminal -> RETURN/KILL', 1);
 
 -- (2) RESOLUTION: unconditional KILL for INCLRF/INCLRB RETURN items. Unlike
 -- OUTCLRDDA (which routes by BOFD RT to FED/SVPCO/KILL), these always terminate,
