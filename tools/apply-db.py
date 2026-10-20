@@ -8,8 +8,9 @@ Usage:
     --mysql-user root --mysql-password password \
     --dry-run
 
-By default the script executes schema/ files first (in sorted order), then
-tenant/ files. Use --dry-run to print the execution plan without running it.
+By default the script executes mysql/ files first (in sorted order), then
+tenant/ files. Postgres files under postgres/ are applied by apply-postgres.py.
+Use --dry-run to print the execution plan without running it.
 """
 from __future__ import annotations
 
@@ -30,11 +31,11 @@ def discover_sql_files(rendered_dir: Path) -> tuple[list[Path], list[Path]]:
     schema_files: list[Path] = []
     tenant_files: list[Path] = []
 
-    schema_dir = rendered_dir / "schema"
+    mysql_dir = rendered_dir / "mysql"
     tenant_dir = rendered_dir / "tenant"
 
-    if schema_dir.exists():
-        schema_files = sorted(schema_dir.rglob("*.sql"))
+    if mysql_dir.exists():
+        schema_files = sorted(mysql_dir.rglob("*.sql"))
     if tenant_dir.exists():
         tenant_files = sorted(tenant_dir.rglob("*.sql"))
 
@@ -53,11 +54,11 @@ def extract_use_database(content: str) -> str | None:
 
 
 def ensure_databases_exist(connection, rendered_dir: Path) -> None:
-    schema_dir = rendered_dir / "schema"
+    mysql_dir = rendered_dir / "mysql"
     tenant_dir = rendered_dir / "tenant"
     databases: set[str] = set()
 
-    for source_dir in (schema_dir, tenant_dir):
+    for source_dir in (mysql_dir, tenant_dir):
         if not source_dir.exists():
             continue
         for sql_file in source_dir.rglob("*.sql"):

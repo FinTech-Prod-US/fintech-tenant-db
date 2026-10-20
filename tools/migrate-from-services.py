@@ -3,10 +3,10 @@
 One-time migration of DB schema/seed SQL from service repos into this repo.
 
 Reads the legacy local-db-init scripts from ECS_UtilityScripts and produces:
-  schema/primary/*.sql
-  schema/business_rules/*.sql
-  schema/dup_detect/*.sql
-  schema/shared/*.sql
+  mysql/primary/*.sql
+  mysql/business_rules/*.sql
+  mysql/dup_detect/*.sql
+  mysql/shared/*.sql
 
 It replaces hardcoded DB names with placeholders:
   check_payment_platform -> ${DB_NAME_PRIMARY}
@@ -80,7 +80,7 @@ def replace_db_names(content: str) -> str:
 
 
 def migrate(source_dir: Path, repo_root: Path) -> None:
-    schema_dir = repo_root / "schema"
+    schema_dir = repo_root / "mysql"
     schema_dir.mkdir(parents=True, exist_ok=True)
 
     for source_name, (target_db, target_name) in SOURCE_FILES.items():
@@ -123,7 +123,7 @@ def main() -> int:
         return 1
 
     migrate(args.source_dir, args.repo_root)
-    print("\nMigration complete. Review schema/ for placeholder correctness.")
+    print("\nMigration complete. Review mysql/ for placeholder correctness.")
     return 0
 
 

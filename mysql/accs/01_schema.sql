@@ -4,8 +4,8 @@
 -- correct — Accs-Server connects to DB_NAME_PRIMARY for all its tables.
 --
 -- Accs-Server table locations:
---   users               → ${DB_NAME_PRIMARY}     (schema/primary/01_schema.sql)
---   BANK_MESSAGING_CONFIG → ${DB_NAME_BUSINESS_RULES} (schema/business_rules/10_bank_messaging_config.sql)
+--   users               → ${DB_NAME_PRIMARY}     (mysql/primary/01_schema.sql)
+--   BANK_MESSAGING_CONFIG → ${DB_NAME_BUSINESS_RULES} (mysql/business_rules/10_bank_messaging_config.sql)
 --
 -- The cheques table below belongs to the legacy Accs Java service and is
 -- retained here for reference.  The current Node.js Accs-Server does not use
