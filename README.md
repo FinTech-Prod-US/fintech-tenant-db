@@ -75,12 +75,15 @@ python tools/apply-db.py --rendered-dir ./rendered/mcb \
 ```bash
 python tools/apply-postgres.py --rendered-dir ./rendered/mcb \
   --pg-host localhost --pg-port 5432 \
-  --pg-user postgres --pg-password password \
+  --pg-user accs_dev --pg-password password \
+  --pg-admin-user postgres --pg-admin-password password \
   --pg-database mcb_clearpilot
 ```
 
-Onboard creates `mcb_clearpilot` if it is missing. copilot-api `PG_URL` must
-point at that tenant-prefixed database, not the cluster default named `postgres`.
+Onboard creates `mcb_clearpilot` if it is missing, then installs `vector` as
+the superuser (`--pg-admin-user`). App users have CREATEDB only. copilot-api
+`PG_URL` must point at that tenant-prefixed database, not the cluster default
+named `postgres`.
 
 ## Adding a new tenant
 
