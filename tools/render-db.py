@@ -32,14 +32,16 @@ PLACEHOLDERS = [
     ("${DB_NAME_BUSINESS_RULES}", "db_name_business_rules"),
     ("${DB_NAME_DUP_DETECT}", "db_name_dup_detect"),
     ("${DB_NAME_ACCS}", "db_name_accs"),
+    ("${DB_NAME_POSTGRES}", "db_name_postgres"),
 ]
 
-# metadata.yaml key -> db_names dict key
+# metadata.yaml db_names key -> db_names dict key
 _METADATA_KEY_MAP = {
     "primary":        "db_name_primary",
     "business_rules": "db_name_business_rules",
     "dup_detect":     "db_name_dup_detect",
     "accs":           "db_name_accs",
+    "postgres":       "db_name_postgres",
 }
 
 
@@ -88,8 +90,7 @@ def render_file(
     for placeholder, value in substitutions.items():
         content = content.replace(placeholder, value)
 
-    # Safety check: any remaining placeholder is an error
-    remaining = re.findall(r"\$\{DB_NAME_[A-Z_]+\}", content)
+    remaining = re.findall(r"\$\{[A-Z][A-Z0-9_]+\}", content)
     if remaining:
         raise ValueError(
             f"Unresolved placeholders in {source}: {set(remaining)}"
@@ -105,24 +106,32 @@ def render_tenant(
     db_names: dict[str, str],
     output_dir: Path,
 ) -> None:
-    schema_dir = repo_root / "schema"
+    mysql_dir = repo_root / "mysql"
+    postgres_dir = repo_root / "postgres"
     tenant_dir = repo_root / "tenants" / tenant
 
     # Build substitution map for placeholders -> actual DB names
-    substitutions: dict[str, str] = {}
+    substitutions: dict[str, str] = {
+        "${TENANT}": tenant,
+        "${PG_ROLE_WEBSITE_CHAT}": f"{tenant}_website_chat_reader",
+    }
     for placeholder, key in PLACEHOLDERS:
         value = db_names.get(key)
         if value:
             substitutions[placeholder] = value
 
-    # Render canonical schema
-    if schema_dir.exists():
-        for source in sorted(schema_dir.rglob("*.sql")):
-            relative = source.relative_to(schema_dir)
-            target = output_dir / "schema" / relative
+    if mysql_dir.exists():
+        for source in sorted(mysql_dir.rglob("*.sql")):
+            relative = source.relative_to(mysql_dir)
+            target = output_dir / "mysql" / relative
             render_file(source, target, substitutions)
 
-    # Render tenant-specific overrides
+    if postgres_dir.exists() and db_names.get("db_name_postgres"):
+        for source in sorted(postgres_dir.rglob("*.sql")):
+            relative = source.relative_to(postgres_dir)
+            target = output_dir / "postgres" / relative
+            render_file(source, target, substitutions)
+
     if tenant_dir.exists():
         for source in sorted(tenant_dir.rglob("*.sql")):
             relative = source.relative_to(tenant_dir)
@@ -137,6 +146,7 @@ def main() -> int:
     parser.add_argument("--db-name-business-rules", help="Business rules DB name (overrides metadata.yaml)")
     parser.add_argument("--db-name-dup-detect", help="Dup detect DB name (overrides metadata.yaml)")
     parser.add_argument("--db-name-accs", help="Accs DB name (overrides metadata.yaml)")
+    parser.add_argument("--db-name-postgres", help="Postgres DB name (overrides metadata.yaml)")
     parser.add_argument(
         "--output",
         type=Path,
@@ -159,6 +169,7 @@ def main() -> int:
         "db_name_business_rules": args.db_name_business_rules,
         "db_name_dup_detect":     args.db_name_dup_detect,
         "db_name_accs":           args.db_name_accs,
+        "db_name_postgres":       args.db_name_postgres,
     }
     for key, val in cli_overrides.items():
         if val:

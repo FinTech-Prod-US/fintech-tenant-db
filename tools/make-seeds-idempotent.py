@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-SCHEMA_DIR = Path(__file__).resolve().parent.parent / "schema"
+SCHEMA_DIR = Path(__file__).resolve().parent.parent / "mysql"
 
 seed_files = list(SCHEMA_DIR.rglob("*seed*.sql"))
 print(f"Found {len(seed_files)} seed files")
