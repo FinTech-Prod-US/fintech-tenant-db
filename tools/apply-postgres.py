@@ -5,12 +5,14 @@ Apply rendered Postgres SQL under postgres/ to a tenant-prefixed database.
 Usage:
   python tools/apply-postgres.py --rendered-dir ./rendered/mcb \
     --pg-host localhost --pg-port 5432 \
-    --pg-user postgres --pg-password password \
+    --pg-user accs_dev --pg-password password \
     --pg-database mcb_clearpilot \
+    --pg-admin-user postgres --pg-admin-password password \
     --dry-run
 
 Connects first to the maintenance database (postgres), creates --pg-database
-if it does not exist, then applies postgres/**/*.sql in that database.
+if it does not exist, then CREATE EXTENSION vector (superuser — app users
+have CREATEDB only), then applies postgres/**/*.sql in that database.
 Never reads mysql/.
 """
 from __future__ import annotations
@@ -34,6 +36,16 @@ def discover_sql_files(rendered_dir: Path) -> list[Path]:
     return sorted(postgres_dir.rglob("*.sql"))
 
 
+def _connect(host: str, port: int, user: str, password: str, dbname: str):
+    return psycopg2.connect(
+        host=host,
+        port=port,
+        user=user,
+        password=password,
+        dbname=dbname,
+    )
+
+
 def ensure_database(admin_conn, db_name: str, dry_run: bool) -> None:
     print(f"  {'[dry-run] ' if dry_run else ''}ensure database {db_name}")
     if dry_run:
@@ -44,6 +56,34 @@ def ensure_database(admin_conn, db_name: str, dry_run: bool) -> None:
         if cursor.fetchone():
             return
         cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(db_name)))
+
+
+def ensure_vector_extension(
+    pg_host: str,
+    pg_port: int,
+    admin_user: str,
+    admin_password: str,
+    pg_database: str,
+    dry_run: bool,
+) -> None:
+    print(f"  {'[dry-run] ' if dry_run else ''}ensure extension vector in {pg_database}")
+    if dry_run:
+        return
+    conn = _connect(pg_host, pg_port, admin_user, admin_password, pg_database)
+    conn.autocommit = True
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    except psycopg2.errors.InsufficientPrivilege:
+        print(
+            "CREATE EXTENSION vector requires a Postgres superuser. "
+            "Pass --pg-admin-user / --pg-admin-password "
+            "(Jenkins: postgres-<env>-admin-credentials).",
+            file=sys.stderr,
+        )
+        raise
+    finally:
+        conn.close()
 
 
 def execute_sql_file(connection, file_path: Path, dry_run: bool) -> None:
@@ -66,6 +106,8 @@ def apply(
     pg_password: str,
     pg_database: str,
     dry_run: bool,
+    pg_admin_user: str = "",
+    pg_admin_password: str = "",
 ) -> int:
     files = discover_sql_files(rendered_dir)
     if not files:
@@ -77,6 +119,7 @@ def apply(
         print(f"  {'[dry-run] ' if dry_run else ''}{f}")
 
     if dry_run:
+        print("  [dry-run] ensure extension vector")
         return 0
 
     if not psycopg2:
@@ -86,25 +129,19 @@ def apply(
         )
         return 1
 
-    admin = psycopg2.connect(
-        host=pg_host,
-        port=pg_port,
-        user=pg_user,
-        password=pg_password,
-        dbname="postgres",
-    )
+    admin = _connect(pg_host, pg_port, pg_user, pg_password, "postgres")
     try:
         ensure_database(admin, pg_database, dry_run=False)
     finally:
         admin.close()
 
-    conn = psycopg2.connect(
-        host=pg_host,
-        port=pg_port,
-        user=pg_user,
-        password=pg_password,
-        dbname=pg_database,
+    ext_user = pg_admin_user or pg_user
+    ext_password = pg_admin_password if pg_admin_user else pg_password
+    ensure_vector_extension(
+        pg_host, pg_port, ext_user, ext_password, pg_database, dry_run=False
     )
+
+    conn = _connect(pg_host, pg_port, pg_user, pg_password, pg_database)
     try:
         for file_path in files:
             execute_sql_file(conn, file_path, dry_run=False)
@@ -122,6 +159,12 @@ def main() -> int:
     parser.add_argument("--pg-port", type=int, default=5432)
     parser.add_argument("--pg-user", required=True)
     parser.add_argument("--pg-password", default="")
+    parser.add_argument(
+        "--pg-admin-user",
+        default="",
+        help="Superuser for CREATE EXTENSION vector (app users have CREATEDB only)",
+    )
+    parser.add_argument("--pg-admin-password", default="")
     parser.add_argument(
         "--pg-database",
         required=True,
@@ -142,6 +185,8 @@ def main() -> int:
         args.pg_password,
         args.pg_database,
         args.dry_run,
+        args.pg_admin_user,
+        args.pg_admin_password,
     )
 
 
