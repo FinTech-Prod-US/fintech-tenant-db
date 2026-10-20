@@ -1,11 +1,12 @@
 -- ClearPilot RAG store. Applied by apply-postgres.py to ${DB_NAME_POSTGRES}.
+-- Schema name comes from tenants/<tenant>/metadata.yaml → postgres_schemas.clearpilot.
 -- Copied from copilot-api/migrations/001_rag_documents.sql (idempotent).
 
 CREATE EXTENSION IF NOT EXISTS vector;
 
-CREATE SCHEMA IF NOT EXISTS clearpilot;
+CREATE SCHEMA IF NOT EXISTS ${SCHEMA_CLEARPILOT};
 
-CREATE TABLE IF NOT EXISTS clearpilot.rag_documents (
+CREATE TABLE IF NOT EXISTS ${SCHEMA_CLEARPILOT}.rag_documents (
   collection  text         NOT NULL,
   id          text         NOT NULL,
   content     text         NOT NULL,
@@ -18,4 +19,4 @@ CREATE TABLE IF NOT EXISTS clearpilot.rag_documents (
 );
 
 CREATE INDEX IF NOT EXISTS rag_documents_embedding_hnsw
-  ON clearpilot.rag_documents USING hnsw (embedding vector_l2_ops);
+  ON ${SCHEMA_CLEARPILOT}.rag_documents USING hnsw (embedding vector_l2_ops);

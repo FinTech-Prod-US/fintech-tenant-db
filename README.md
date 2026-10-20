@@ -46,7 +46,9 @@ SQL files use placeholders that are substituted at render time:
 | `${DB_NAME_BUSINESS_RULES}` | `business_rules` | `mcb_business_rules` |
 | `${DB_NAME_DUP_DETECT}` | `dup_detect` | `mcb_dup_detect` |
 | `${DB_NAME_ACCS}` | `accs` / cheque_clearing | `mcb_check_payment_platform` |
-| `${DB_NAME_POSTGRES}` | ClearPilot / website chat | `mcb_clearpilot` |
+| `${DB_NAME_POSTGRES}` | Postgres database (both schemas) | `mcb_clearpilot` |
+| `${SCHEMA_CLEARPILOT}` | RAG schema inside that database | `clearpilot` |
+| `${SCHEMA_WEBSITE_CHAT}` | Public-chat schema inside that database | `website_chat` |
 | `${PG_ROLE_WEBSITE_CHAT}` | public-chat reader role | `mcb_website_chat_reader` |
 
 ## Workflow

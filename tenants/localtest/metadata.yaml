@@ -7,3 +7,6 @@ db_names:
   dup_detect: localtest_dup_detect
   accs: localtest_check_payment_platform
   postgres: localtest_clearpilot
+postgres_schemas:
+  clearpilot: clearpilot
+  website_chat: website_chat

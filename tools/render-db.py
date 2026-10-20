@@ -33,6 +33,8 @@ PLACEHOLDERS = [
     ("${DB_NAME_DUP_DETECT}", "db_name_dup_detect"),
     ("${DB_NAME_ACCS}", "db_name_accs"),
     ("${DB_NAME_POSTGRES}", "db_name_postgres"),
+    ("${SCHEMA_CLEARPILOT}", "schema_clearpilot"),
+    ("${SCHEMA_WEBSITE_CHAT}", "schema_website_chat"),
 ]
 
 # metadata.yaml db_names key -> db_names dict key
@@ -42,6 +44,11 @@ _METADATA_KEY_MAP = {
     "dup_detect":     "db_name_dup_detect",
     "accs":           "db_name_accs",
     "postgres":       "db_name_postgres",
+}
+
+_SCHEMA_KEY_MAP = {
+    "clearpilot":   "schema_clearpilot",
+    "website_chat": "schema_website_chat",
 }
 
 
@@ -55,30 +62,40 @@ def load_metadata(repo_root: Path, tenant: str) -> dict[str, str]:
         # Fallback: simple regex parse for the db_names block
         content = metadata_path.read_text(encoding="utf-8")
         result: dict[str, str] = {}
-        in_db_names = False
+        current_map = None
         for line in content.splitlines():
-            if line.strip() == "db_names:":
-                in_db_names = True
+            stripped = line.strip()
+            if stripped == "db_names:":
+                current_map = _METADATA_KEY_MAP
                 continue
-            if in_db_names:
+            if stripped == "postgres_schemas:":
+                current_map = _SCHEMA_KEY_MAP
+                continue
+            if current_map is not None:
                 if line.startswith(" ") or line.startswith("\t"):
                     m = re.match(r"\s+(\w+):\s*(.+)", line)
                     if m:
                         yaml_key, value = m.group(1).strip(), m.group(2).strip()
-                        dict_key = _METADATA_KEY_MAP.get(yaml_key)
+                        dict_key = current_map.get(yaml_key)
                         if dict_key:
                             result[dict_key] = value
-                else:
-                    in_db_names = False
+                elif stripped and not stripped.startswith("#"):
+                    current_map = None
         return result
 
     data = yaml.safe_load(metadata_path.read_text(encoding="utf-8")) or {}
     db_names_raw = data.get("db_names", {}) or {}
-    return {
+    result = {
         _METADATA_KEY_MAP[k]: v
         for k, v in db_names_raw.items()
         if k in _METADATA_KEY_MAP and v
     }
+    schemas_raw = data.get("postgres_schemas", {}) or {}
+    for yaml_key, dict_key in _SCHEMA_KEY_MAP.items():
+        value = schemas_raw.get(yaml_key)
+        if value:
+            result[dict_key] = value
+    return result
 
 
 def render_file(
@@ -187,6 +204,8 @@ def main() -> int:
     # Default DB_NAME_ACCS to primary if not provided
     if "db_name_accs" not in db_names and "db_name_primary" in db_names:
         db_names["db_name_accs"] = db_names["db_name_primary"]
+    db_names.setdefault("schema_clearpilot", "clearpilot")
+    db_names.setdefault("schema_website_chat", "website_chat")
 
     print(f"Rendering tenant '{args.tenant}' with db_names:")
     for k, v in sorted(db_names.items()):
