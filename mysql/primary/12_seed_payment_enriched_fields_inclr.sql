@@ -7,7 +7,7 @@
 -- UI/reporting. Matches what the INCLRF/INCLRB CDE_JSON_Rule writes:
 --   ENRICHED_DATA_01 = deposit match confidence (SINGLE / NONE / MULTIPLE)
 --   ENRICHED_DATA_02 = matched depositor account (debit target)
---   ENRICHED_DATA_03 = matched deposit id
+--   ENRICHED_DATA_03 = matched deposit key (DEPOSIT_KEY)
 -- Collection type 02 covers both INCLRF (Fed) and INCLRB (bank via SVPCO).
 -- Unique key (COLLECTION_CODE, ENRICHED_COLUMN_LABEL) -> idempotent upsert.
 -- ============================================================================
@@ -17,5 +17,5 @@ USE ${DB_NAME_PRIMARY};
 INSERT INTO PAYMENT_ENRICHED_FIELDS (COLLECTION_CODE, ENRICHED_COLUMN_LABEL, ENRICHED_COLUMN_VALUE) VALUES
   ('02', 'ENRICHED_DATA_01', 'Deposit Match Confidence'),
   ('02', 'ENRICHED_DATA_02', 'Matched Depositor Account'),
-  ('02', 'ENRICHED_DATA_03', 'Matched Deposit ID')
+  ('02', 'ENRICHED_DATA_03', 'Matched Deposit Key')
 ON DUPLICATE KEY UPDATE ENRICHED_COLUMN_VALUE = VALUES(ENRICHED_COLUMN_VALUE);
