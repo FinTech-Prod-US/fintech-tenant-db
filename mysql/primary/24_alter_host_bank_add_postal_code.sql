@@ -31,7 +31,7 @@ EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
 -- Placeholder for local and dev, matching the placeholder street address seeded
--- in 16_seed_host_bank_contact.sql. Only an empty value is filled, so a tenant
+-- in 23_seed_host_bank_contact.sql. Only an empty value is filled, so a tenant
 -- holding its real postal code is untouched.
 UPDATE HOST_BANK
    SET POSTAL_CODE = '10001'
