@@ -5,6 +5,7 @@ db_names:
   primary: mcb_check_payment_platform
   business_rules: mcb_business_rules
   dup_detect: mcb_dup_detect
+  archive: mcb_check_archive
   accs: mcb_check_payment_platform
   # One tenant-prefixed Postgres database. Both ClearPilot schemas live in it.
   postgres: mcb_clearpilot
