@@ -31,6 +31,7 @@ PLACEHOLDERS = [
     ("${DB_NAME_PRIMARY}", "db_name_primary"),
     ("${DB_NAME_BUSINESS_RULES}", "db_name_business_rules"),
     ("${DB_NAME_DUP_DETECT}", "db_name_dup_detect"),
+    ("${DB_NAME_ARCHIVE}", "db_name_archive"),
     ("${DB_NAME_ACCS}", "db_name_accs"),
     ("${DB_NAME_POSTGRES}", "db_name_postgres"),
     ("${SCHEMA_CLEARPILOT}", "schema_clearpilot"),
@@ -42,6 +43,7 @@ _METADATA_KEY_MAP = {
     "primary":        "db_name_primary",
     "business_rules": "db_name_business_rules",
     "dup_detect":     "db_name_dup_detect",
+    "archive":        "db_name_archive",
     "accs":           "db_name_accs",
     "postgres":       "db_name_postgres",
 }
@@ -162,6 +164,7 @@ def main() -> int:
     parser.add_argument("--db-name-primary", help="Primary DB name (overrides metadata.yaml)")
     parser.add_argument("--db-name-business-rules", help="Business rules DB name (overrides metadata.yaml)")
     parser.add_argument("--db-name-dup-detect", help="Dup detect DB name (overrides metadata.yaml)")
+    parser.add_argument("--db-name-archive", help="Research archive DB name (overrides metadata.yaml)")
     parser.add_argument("--db-name-accs", help="Accs DB name (overrides metadata.yaml)")
     parser.add_argument("--db-name-postgres", help="Postgres DB name (overrides metadata.yaml)")
     parser.add_argument(
@@ -185,6 +188,7 @@ def main() -> int:
         "db_name_primary":        args.db_name_primary,
         "db_name_business_rules": args.db_name_business_rules,
         "db_name_dup_detect":     args.db_name_dup_detect,
+        "db_name_archive":        args.db_name_archive,
         "db_name_accs":           args.db_name_accs,
         "db_name_postgres":       args.db_name_postgres,
     }
