@@ -10,6 +10,8 @@
 -- Unique key (COLLECTION_CODE, ENRICHED_COLUMN_LABEL) -> idempotent upsert.
 -- ============================================================================
 
+USE ${DB_NAME_PRIMARY};
+
 INSERT INTO PAYMENT_ENRICHED_FIELDS (COLLECTION_CODE, ENRICHED_COLUMN_LABEL, ENRICHED_COLUMN_VALUE) VALUES
   ('03', 'ENRICHED_DATA_01', 'Parent On-Us Positive Pay Flag'),
   ('03', 'ENRICHED_DATA_02', 'Parent BOFD RT')

@@ -17,6 +17,7 @@ fintech-tenant-db/
 │   │   └── 03_master_seed.sql
 │   ├── business_rules/
 │   ├── dup_detect/
+│   ├── archive/                   # research archive (check_archive), RANGE-partitioned
 │   ├── accs/                      # accs-server database
 │   └── shared/                    # users, grants, cross-db references
 │       └── 01_users_seed.sql
@@ -45,6 +46,7 @@ SQL files use placeholders that are substituted at render time:
 | `${DB_NAME_PRIMARY}` | `check_payment_platform` | `mcb_check_payment_platform` |
 | `${DB_NAME_BUSINESS_RULES}` | `business_rules` | `mcb_business_rules` |
 | `${DB_NAME_DUP_DETECT}` | `dup_detect` | `mcb_dup_detect` |
+| `${DB_NAME_ARCHIVE}` | `check_archive` (research archive, SPEC_14) | `mcb_check_archive` |
 | `${DB_NAME_ACCS}` | `accs` / cheque_clearing | `mcb_check_payment_platform` |
 | `${DB_NAME_POSTGRES}` | Postgres database (both schemas) | `mcb_clearpilot` |
 | `${SCHEMA_CLEARPILOT}` | RAG schema inside that database | `clearpilot` |
@@ -114,6 +116,7 @@ Shared MySQL host with prefixed databases:
 mcb_check_payment_platform
 mcb_business_rules
 mcb_dup_detect
+mcb_check_archive
 ```
 
 Shared Postgres host with prefixed databases and roles:
