@@ -5,6 +5,7 @@
 -- and names the files GL_EXTRACT_<RUN_ID>.csv / .dat. Makes the run identity safe across Posting instances.
 -- Copy: posting V6__posting_gl_run.sql
 -- ============================================================================
+USE ${DB_NAME_PRIMARY};
 CREATE TABLE IF NOT EXISTS POSTING_GL_RUN (
   RUN_ID        VARCHAR(48) NOT NULL,
   BUSINESS_DATE CHAR(8)     NOT NULL,
