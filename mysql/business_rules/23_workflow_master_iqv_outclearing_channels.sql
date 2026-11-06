@@ -1,5 +1,5 @@
 -- ============================================================================
--- WORKFLOW_MASTER: IQV validation flags for every outclearing channel (idempotent). Run after 22.
+-- WORKFLOW_MASTER: IQV validation flags for every outclearing channel + INCLFB (idempotent). Run after 22.
 -- Run against: business_rules database
 --
 -- Why: IQV reads its validation flags from IQV_JSON_Rule.collectionCodeMap[<item collection code>]. When the code is
@@ -10,14 +10,14 @@
 --
 -- What this script does:
 --   1. Repairs OUTCLFBR where the map key is the typo INCFF (found on a live local DB; the 09 seed script is correct).
---   2. Adds a WORKFLOW_MASTER row, with ONLY the IQV rule, for OUTCLFATM, OUTCLFMOB, OUTCLFRDC and OUTCLFLBX.
+--   2. Adds a WORKFLOW_MASTER row, with ONLY the IQV rule, for OUTCLFATM, OUTCLFMOB, OUTCLFRDC, OUTCLFLBX, OUTCLFCOR
+--      and INCLFB (INCLFB items had no matching row: the existing inclearing-back row is spelled INCFB).
 --      Data-services reads one rule column at a time and returns null for both a missing row and a NULL column, so a row
 --      holding only IQV_JSON_Rule changes IQV behaviour and nothing else.
 --   3. Fills IQV_JSON_Rule on those rows if the row already exists with a NULL IQV rule. An existing IQV rule is never changed.
 -- Flags match OUTCLFBR / INCLFF: IQA + TIFF validation on, IUA / IUA-OCR / fraud off.
 --
--- Not covered here (decide separately): OUTCLFCOR (correspondent) has no row either, and INCLFB items have no matching row
--- (the row is spelled INCFB). Both still fall back to run-all.
+-- The legacy INCFB row is left untouched (nothing reads it once INCLFB has its own row).
 -- ============================================================================
 USE ${DB_NAME_BUSINESS_RULES};
 
@@ -38,7 +38,11 @@ INSERT IGNORE INTO WORKFLOW_MASTER (Collection_Code, Name, IQV_JSON_Rule) VALUES
 ('OUTCLFRDC', 'Outclearing Remote Deposit - IQV validation flags',
  '{"collectionCodeMap": {"OUTCLFRDC": {"iqa": true, "iua": false, "fraud": false, "iuaOcr": false, "tiffValidation": true}}}'),
 ('OUTCLFLBX', 'Outclearing Lockbox - IQV validation flags',
- '{"collectionCodeMap": {"OUTCLFLBX": {"iqa": true, "iua": false, "fraud": false, "iuaOcr": false, "tiffValidation": true}}}');
+ '{"collectionCodeMap": {"OUTCLFLBX": {"iqa": true, "iua": false, "fraud": false, "iuaOcr": false, "tiffValidation": true}}}'),
+('OUTCLFCOR', 'Outclearing Correspondent - IQV validation flags',
+ '{"collectionCodeMap": {"OUTCLFCOR": {"iqa": true, "iua": false, "fraud": false, "iuaOcr": false, "tiffValidation": true}}}'),
+('INCLFB', 'Inclearing Forward Back - IQV validation flags',
+ '{"collectionCodeMap": {"INCLFB": {"iqa": true, "iua": false, "fraud": false, "iuaOcr": false, "tiffValidation": true}}}');
 
 -- 3. A pre-existing row with no IQV rule gets the flags; an existing IQV rule is left alone
 UPDATE WORKFLOW_MASTER SET IQV_JSON_Rule = '{"collectionCodeMap": {"OUTCLFATM": {"iqa": true, "iua": false, "fraud": false, "iuaOcr": false, "tiffValidation": true}}}'
@@ -49,5 +53,9 @@ UPDATE WORKFLOW_MASTER SET IQV_JSON_Rule = '{"collectionCodeMap": {"OUTCLFRDC": 
   WHERE Collection_Code = 'OUTCLFRDC' AND IQV_JSON_Rule IS NULL;
 UPDATE WORKFLOW_MASTER SET IQV_JSON_Rule = '{"collectionCodeMap": {"OUTCLFLBX": {"iqa": true, "iua": false, "fraud": false, "iuaOcr": false, "tiffValidation": true}}}'
   WHERE Collection_Code = 'OUTCLFLBX' AND IQV_JSON_Rule IS NULL;
+UPDATE WORKFLOW_MASTER SET IQV_JSON_Rule = '{"collectionCodeMap": {"OUTCLFCOR": {"iqa": true, "iua": false, "fraud": false, "iuaOcr": false, "tiffValidation": true}}}'
+  WHERE Collection_Code = 'OUTCLFCOR' AND IQV_JSON_Rule IS NULL;
+UPDATE WORKFLOW_MASTER SET IQV_JSON_Rule = '{"collectionCodeMap": {"INCLFB": {"iqa": true, "iua": false, "fraud": false, "iuaOcr": false, "tiffValidation": true}}}'
+  WHERE Collection_Code = 'INCLFB' AND IQV_JSON_Rule IS NULL;
 
 SELECT 'workflow master iqv outclearing channels applied' AS result;
