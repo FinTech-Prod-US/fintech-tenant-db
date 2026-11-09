@@ -72,6 +72,9 @@ python tools/apply-db.py --rendered-dir ./rendered/mcb \
   --mysql-host localhost --mysql-user root --mysql-password password
 ```
 
+Scripts apply in sorted path order, so each number prefix must be unique per folder. V0.9.3 order after v0.9.2
+(`primary/23-26`, `business_rules/23`): `primary/17` -> `18` -> `19` -> `20` -> `22` -> `business_rules/22` -> `primary/21` -> `primary/27` -> `primary/28`, then `business_rules/24` (IQV flags) and `business_rules/25` (outclearing endpoint rules).
+
 ### Apply to Postgres
 
 ```bash

@@ -1,5 +1,5 @@
 -- ============================================================================
--- SPEC_09 Phase 4: POSTING_GL_RUN run-id reservation (idempotent). Run after 23.
+-- SPEC_09 Phase 4: POSTING_GL_RUN run-id reservation (idempotent). Run after 27.
 -- A GL run reserves its id with a single INSERT (RUN_ID primary key) BEFORE any return claim is stamped or any file
 -- is written; a duplicate key means another run owns the id. RUN_ID = <businessDate>-<UTC yyyyMMddHHmmssSSS>-<8 hex>,
 -- and names the files GL_EXTRACT_<RUN_ID>.csv / .dat. Makes the run identity safe across Posting instances.
