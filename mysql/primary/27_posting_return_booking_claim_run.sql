@@ -17,4 +17,3 @@ SET @s := IF(@c=0,
  'ALTER TABLE POSTING_RETURN_BOOKING ADD KEY IDX_PRB_CLAIM_RUN (STATE, CLAIM_RUN)',
  'SELECT ''IDX_PRB_CLAIM_RUN exists'' AS result');
 PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-SELECT 'posting return booking claim run applied' AS result;

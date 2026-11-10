@@ -4,13 +4,13 @@
 -- Spec: SPEC_10_returned_deposited_item_pipeline.md (Phase A, §4.2)
 --
 -- One api_lookup to Data Services /items/match-returned-deposit matches the return
--- {RT, account, serial, amount} to the ORIGINAL deposit by natural key against
--- ITEM_DETAILS deposit rows and returns a match confidence + the depositor account. Exactly one
+-- {RT, account, serial, amount} to the ORIGINAL deposit (TAE_TRANSACTION ->
+-- TAE_DEPOSIT) and returns a match confidence + the depositor account. Exactly one
 -- match -> exceptionCode=RETURNED_DEPOSIT (CDE dispositions RETURN -> terminal KILL,
 -- posting debits the depositor). Zero or multiple matches -> ENDPOINT_REVIEW
 -- (operator selects the deposit account; same KILL + debit-back path afterwards).
 --
--- Enriched_Data_01 = match confidence, 02 = matched depositor account, 03 = deposit key.
+-- Enriched_Data_01 = match confidence, 02 = matched depositor account, 03 = deposit id.
 -- (SQL single quotes inside the JSON are doubled: '' -> '''' for empty-string tests.)
 -- ============================================================================
 USE ${DB_NAME_BUSINESS_RULES};
@@ -52,7 +52,7 @@ UPDATE WORKFLOW_MASTER SET
             "$ctx.vars.depositAccount": "$response.depositAccount"
           }},
           "on_error": { "goto": "end_with_match_error" },
-          "description": "Match the return to the original deposit by natural key against ITEM_DETAILS deposit rows; return confidence + depositor account"
+          "description": "Match the return to the original deposit via TAE_TRANSACTION -> TAE_DEPOSIT; return confidence + depositor account"
         },
         {
           "id": "single_match_gate",
